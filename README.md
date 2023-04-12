@@ -1,7 +1,7 @@
 GioRefreshRate
 --------
 
-Allows to set the display refresh rate on Android. Some manufacturers limit apps using SurfaceView (such as gio) to 60hz, this library can bring it back and have that scroll be smooth.
+Allows to set the display refresh rate in [Gio](https://gioui.org) apps on Android. Some manufacturers limit apps using SurfaceView to 60hz, this library can bring it back and have that scroll be smooth.
 
 <img src="pic.jpg" width="480">
 
