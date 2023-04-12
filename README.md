@@ -5,8 +5,6 @@ Allows to set the display refresh rate on Android. Some manufacturers limit apps
 
 <img src="pic.jpg" width="480">
 
-Uses the same approach as [flutter_displaymode](https://github.com/ajinasokan/flutter_displaymode).
-
 ## Getting Started
 
 Run `go get github.com/ilidemi/giorefreshrate`
@@ -24,3 +22,7 @@ Call `giorefreshrate.PreferHighRefreshRate()` or `giorefreshrate.PreferLowRefres
         }
     }
 ```
+
+## Notes
+
+Uses the same approach as [flutter_displaymode](https://github.com/ajinasokan/flutter_displaymode).
