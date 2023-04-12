@@ -23,6 +23,8 @@ Call `giorefreshrate.PreferHighRefreshRate()` or `giorefreshrate.PreferLowRefres
     }
 ```
 
+That's it! The refresh rate will be the highest or lowest supported for the current display resolution.
+
 ## Notes
 
 Uses the same approach as [flutter_displaymode](https://github.com/ajinasokan/flutter_displaymode).
