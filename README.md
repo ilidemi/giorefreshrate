@@ -3,9 +3,9 @@ GioRefreshRate
 
 Allows to set the display refresh rate on Android. Some manufacturers limit apps using SurfaceView (such as gio) to 60hz, this library can bring it back and have that scroll be smooth.
 
-Uses the same approach as [flutter_displaymode](https://github.com/ajinasokan/flutter_displaymode).
-
 <img src="pic.jpg" width="480">
+
+Uses the same approach as [flutter_displaymode](https://github.com/ajinasokan/flutter_displaymode).
 
 ## Getting Started
 
