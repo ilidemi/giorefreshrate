@@ -5,6 +5,7 @@ Allows to set the display refresh rate on Android. Some manufacturers limit apps
 
 Uses the same approach as [flutter_displaymode](https://github.com/ajinasokan/flutter_displaymode).
 
+<img src="pic.jpg" width="480">
 
 ## Getting Started
 
@@ -15,10 +16,10 @@ Call `giorefreshrate.PreferHighRefreshRate()` or `giorefreshrate.PreferLowRefres
 ```diff
 +   giorefreshrate.PreferHighRefreshRate()
 
-    for evt := range w.Events() { // Gio main event loop
-+       giorefreshrate.ListenEvents(evt, w)
+    for e := range w.Events() { // Gio main event loop
++       giorefreshrate.ListenEvents(e, w)
 
-        switch evt := evt.(type) {
+        switch e := e.(type) {
             // ...
         }
     }
