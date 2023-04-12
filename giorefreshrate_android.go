@@ -257,6 +257,7 @@ func setRefreshRate(w *app.Window, preference refreshRatePreference) {
 			preferredDisplayModeIdField := getFieldID(env, layoutParamsClass, "preferredDisplayModeId", "I")
 			setIntField(env, layoutParams, preferredDisplayModeIdField, bestModeId)
 
+			// This is the call that needs to happen on the main thread
 			// window.setAttributes(layoutParams);
 			setAttributes := getMethodID(
 				env, windowClass, "setAttributes", "(Landroid/view/WindowManager$LayoutParams;)V",
