@@ -1,4 +1,4 @@
-module giorefreshrate
+module github.com/ilidemi/giorefreshrate
 
 go 1.18
 
