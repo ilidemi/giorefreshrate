@@ -127,19 +127,20 @@ func listenEvents(event event.Event, w *app.Window) error {
 	return nil
 }
 
-// Sets the refresh rate. Doesn't propagate the errors as the calls loop through the main thread.
+// Sets the refresh rate. Doesn't propagate errors as the call loops through the main thread.
 func setRefreshRate(w *app.Window, preference refreshRatePreference) {
 	w.Run(func() {
 		err := runInJVM(javaVM(), func(env *C.JNIEnv) error {
+			// context = surfaceView.getContext();
 			surfaceView := C.jobject(viewPtr)
 			surfaceViewClass := getObjectClass(env, surfaceView)
-
 			getContext := getMethodID(env, surfaceViewClass, "getContext", "()Landroid/content/Context;")
 			context, err := callObjectMethod(env, surfaceView, getContext)
 			if err != nil {
 				return err
 			}
 
+			// display = context.getDisplay();
 			contextClass := getObjectClass(env, context)
 			getDisplay := getMethodID(env, contextClass, "getDisplay", "()Landroid/view/Display;")
 			display, err := callObjectMethod(env, context, getDisplay)
@@ -147,6 +148,7 @@ func setRefreshRate(w *app.Window, preference refreshRatePreference) {
 				return err
 			}
 
+			// currentMode = display.getMode();
 			displayClass := getObjectClass(env, display)
 			getMode := getMethodID(env, displayClass, "getMode", "()Landroid/view/Display$Mode;")
 			currentMode, err := callObjectMethod(env, display, getMode)
@@ -154,6 +156,7 @@ func setRefreshRate(w *app.Window, preference refreshRatePreference) {
 				return err
 			}
 
+			// currentWidth = currentMode.getPhysicalWidth();
 			modeClass := getObjectClass(env, currentMode)
 			getPhysicalWidth := getMethodID(env, modeClass, "getPhysicalWidth", "()I")
 			currentWidth, err := callIntMethod(env, currentMode, getPhysicalWidth)
@@ -161,42 +164,48 @@ func setRefreshRate(w *app.Window, preference refreshRatePreference) {
 				return err
 			}
 
+			// currentHeight = currentMode.getPhysicalHeight();
 			getPhysicalHeight := getMethodID(env, modeClass, "getPhysicalHeight", "()I")
 			currentHeight, err := callIntMethod(env, currentMode, getPhysicalHeight)
 			if err != nil {
 				return err
 			}
 
+			// supportedModes = display.getSupportedModes();
 			getSupportedModes := getMethodID(
 				env, displayClass, "getSupportedModes", "()[Landroid/view/Display$Mode;",
 			)
-			modes, err := callObjectMethod(env, display, getSupportedModes)
+			supportedModes, err := callObjectMethod(env, display, getSupportedModes)
 			if err != nil {
 				return err
 			}
 
-			length := getObjectArrayLength(env, C.jobjectArray(modes))
-
+			// Iterate over supported modes
+			length := getObjectArrayLength(env, C.jobjectArray(supportedModes))
 			getRefreshRate := getMethodID(env, modeClass, "getRefreshRate", "()F")
 			getModeId := getMethodID(env, modeClass, "getModeId", "()I")
 			var bestRefreshRate float32
 			var bestModeId int32
 			for i := 0; i < length; i++ {
-				mode, err := getObjectArrayElement(env, C.jobjectArray(modes), C.jsize(i))
+				// mode = supportedModes[i];
+				mode, err := getObjectArrayElement(env, C.jobjectArray(supportedModes), C.jsize(i))
 				if err != nil {
 					return err
 				}
 
+				// refreshRate = mode.getRefreshRate();
 				refreshRate, err := callFloatMethod(env, mode, getRefreshRate)
 				if err != nil {
 					return err
 				}
 
+				// width = mode.getPhysicalWidth();
 				width, err := callIntMethod(env, mode, getPhysicalWidth)
 				if err != nil {
 					return err
 				}
 
+				// height = mode.getPhysicalHeight();
 				height, err := callIntMethod(env, mode, getPhysicalHeight)
 				if err != nil {
 					return err
@@ -207,6 +216,7 @@ func setRefreshRate(w *app.Window, preference refreshRatePreference) {
 					(preference == refreshRateLow && refreshRate < bestRefreshRate)
 
 				if width == currentWidth && height == currentHeight && refreshRateIsBetter {
+					// modeId = mode.getModeId();
 					modeId, err := callIntMethod(env, mode, getModeId)
 					if err != nil {
 						return err
@@ -221,15 +231,18 @@ func setRefreshRate(w *app.Window, preference refreshRatePreference) {
 				return errors.New("none of the available display modes are matching the current resolution")
 			}
 
-			// Cast context to activity
+			// activity = (Activity)context;
 			activityClass := findClass(env, "android/app/Activity")
 			activity := context
+
+			// window = activity.getWindow();
 			getWindow := getMethodID(env, activityClass, "getWindow", "()Landroid/view/Window;")
 			window, err := callObjectMethod(env, activity, getWindow)
 			if err != nil {
 				return err
 			}
 
+			// layoutParams = window.getAttributes();
 			windowClass := getObjectClass(env, window)
 			getAttributes := getMethodID(
 				env, windowClass, "getAttributes", "()Landroid/view/WindowManager$LayoutParams;",
@@ -239,10 +252,12 @@ func setRefreshRate(w *app.Window, preference refreshRatePreference) {
 				return err
 			}
 
+			// layoutParams.preferredDisplayModeId = bestModeId;
 			layoutParamsClass := getObjectClass(env, layoutParams)
 			preferredDisplayModeIdField := getFieldID(env, layoutParamsClass, "preferredDisplayModeId", "I")
 			setIntField(env, layoutParams, preferredDisplayModeIdField, bestModeId)
 
+			// window.setAttributes(layoutParams);
 			setAttributes := getMethodID(
 				env, windowClass, "setAttributes", "(Landroid/view/WindowManager$LayoutParams;)V",
 			)
